@@ -30,6 +30,22 @@ android {
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        // Overrides the default debug signing config (normally an
+        // auto-generated, machine-specific keystore at
+        // ~/.android/debug.keystore) with a fixed keystore committed to the
+        // repo. Without this, every fresh CI runner would sign with a
+        // different random key, so installing a newer CI build over an
+        // older one would fail with a signature mismatch and force an
+        // uninstall (wiping app data) before the update could proceed.
+        getByName("debug") {
+            storeFile = file("debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
+    }
+
     buildTypes {
         release {
             // TODO: Add your own signing config for the release build.

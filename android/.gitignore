@@ -12,3 +12,9 @@ GeneratedPluginRegistrant.java
 key.properties
 **/*.keystore
 **/*.jks
+
+# Exception: app/debug.keystore is a dedicated, non-secret debug-only
+# signing key committed on purpose so that every build (local and CI)
+# shares the same signature. This keeps app updates/installs working
+# without wiping user data. It must never be used for a real release.
+!app/debug.keystore
