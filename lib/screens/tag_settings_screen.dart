@@ -112,6 +112,11 @@ class _TagSettingsScreenState extends State<TagSettingsScreen> {
                       ? const Center(child: Text('タグがまだありません'))
                       : ReorderableListView.builder(
                           itemCount: _tags.length,
+                          // onReorder is deprecated on newer Flutter SDKs in
+                          // favor of onReorderItem, but the latter doesn't
+                          // exist yet on the SDK this project currently
+                          // targets; keep onReorder for compatibility.
+                          // ignore: deprecated_member_use
                           onReorder: _reorder,
                           itemBuilder: (context, index) {
                             final tag = _tags[index];
