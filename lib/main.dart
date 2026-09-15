@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart';
 
 import 'database_helper.dart';
+import 'screens/log_list_screen.dart';
+import 'tag_repository.dart';
+import 'widgets/tag_chip_row.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -39,6 +42,7 @@ class _InputScreenState extends State<InputScreen> {
   final _focusNode = FocusNode();
   StreamSubscription<Uri?>? _widgetClickSubscription;
   bool _isSaving = false;
+  List<String> _tags = [];
 
   @override
   void initState() {
@@ -48,6 +52,16 @@ class _InputScreenState extends State<InputScreen> {
       _handleWidgetLaunch,
     );
     HomeWidget.initiallyLaunchedFromHomeWidget().then(_handleWidgetLaunch);
+    _loadTags();
+  }
+
+  Future<void> _loadTags() async {
+    final tags = await TagRepository.instance.loadTags();
+    if (mounted) {
+      setState(() {
+        _tags = tags;
+      });
+    }
   }
 
   void _onTextChanged() {
@@ -93,6 +107,14 @@ class _InputScreenState extends State<InputScreen> {
     }
   }
 
+  Future<void> _openLogList() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const LogListScreen()),
+    );
+    // Tags may have been changed from the tag settings screen.
+    _loadTags();
+  }
+
   @override
   void dispose() {
     _widgetClickSubscription?.cancel();
@@ -108,6 +130,16 @@ class _InputScreenState extends State<InputScreen> {
     final canSave = _controller.text.trim().isNotEmpty && !_isSaving;
 
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('テキスト記録'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.list_alt),
+            tooltip: '記録一覧',
+            onPressed: _openLogList,
+          ),
+        ],
+      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -129,6 +161,8 @@ class _InputScreenState extends State<InputScreen> {
                   ),
                 ),
               ),
+              const SizedBox(height: 12),
+              TagChipRow(tags: _tags, controller: _controller),
               const SizedBox(height: 12),
               FilledButton(
                 onPressed: canSave ? _save : null,
